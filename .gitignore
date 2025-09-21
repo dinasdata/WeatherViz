@@ -1,0 +1,8 @@
+.RData
+.Rhistory
+bin/
+etc/
+lib/
+lib64
+pyvenv.cfg
+share/
