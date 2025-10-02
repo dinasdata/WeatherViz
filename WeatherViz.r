@@ -67,8 +67,8 @@ df_year2 = reactive({
 output$plot1 = renderPlot({
     req(input$data)
     req(input$cols)
-    req(input$colors)
     req(input$s1)
+    req(input$colors)
     ggplot(data = df_month2())+
     geom_point(mapping = aes(x = .data[["year"]],y = .data[[input$cols]]),color = input$colors)+
     facet_wrap(~month(.data[["month"]],label = TRUE,abbr = FALSE))+
@@ -78,8 +78,8 @@ output$plot1 = renderPlot({
 output$plot2 = renderPlot({
     req(input$data)
     req(input$cols)
-    req(input$colors)
     req(input$s2)
+    req(input$colors)
     ggplot(data = df_year2())+
     geom_point(mapping = aes(x = .data[["year"]],y = .data[[input$cols]]),color = input$colors)+
     geom_line(mapping = aes(x = .data[["year"]],y = .data[[input$cols]]))+
