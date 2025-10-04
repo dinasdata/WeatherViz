@@ -37,9 +37,8 @@ sidebarPanel(width = 3,
     selectInput("cols","Select parameters",choices = NULL),
     actionButton("btn","Refresh columns",class = "btn-success"),
     selectInput("colors","Choose colors",choices = c("#2997ab","#2cdf85","black","#db5e73ff","grey")),
-    sliderInput("s1","Filter monthly values",max = 0,min = 0,value = 0),
-    sliderInput("s2","Filter per year values",max = 0,min = 0,value = 0),
-    actionButton("btn2","Refresh sliders",class = "btn-success")
+    uiOutput("slider1"),
+    uiOutput("slider2") 
     )))
     ))
     
@@ -51,9 +50,14 @@ server = function(input,output,session){
     df_month = reactive({monthly(df2())})
     month_summary = reactive({summary(df_month()[[input$cols]])})
 observeEvent(input$btn,{updateSelectInput(inputId = "cols",choices = colnames(df2())[2:12])})
-observeEvent(input$btn2,{
-updateSliderInput(inputId = "s1",max = as.double(max(df_month()[[input$cols]])),min = as.double(min(df_month()[[input$cols]])),value = as.double(max(df_month()[[input$cols]])))
-updateSliderInput(inputId = "s2",max = as.double(max(df_year()[[input$cols]])),min = as.double(min(df_year()[[input$cols]])),value = as.double(max(df_year()[[input$cols]])))})
+output$slider1 = renderUI({
+    req(input$cols)
+    sliderInput("s1","Filter monthly values",max = max(df_month()[[input$cols]]),min = min(df_month()[[input$cols]]),value = max(df_month()[[input$cols]]))
+})
+output$slider2 = renderUI({
+    req(input$cols)
+    sliderInput("s2","Filter monthly values",max = max(df_year()[[input$cols]]),min = min(df_year()[[input$cols]]),value = max(df_year()[[input$cols]]))
+})
 df_month2 = reactive({
     req(input$s1)
     df_month()%>%
