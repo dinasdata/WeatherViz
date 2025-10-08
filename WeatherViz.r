@@ -41,10 +41,8 @@ sidebarPanel(width = 3,
     selectInput("colors","Choose colors",choices = c("#2997ab","#2cdf85","black","#db5e73ff","grey")),
     uiOutput("slider1"),
     uiOutput("slider2") 
-<<<<<<< HEAD
-    )))
-=======
-    ))),
+    ))
+    ),
 tabPanel("Forecasting",
 sidebarLayout(
     mainPanel(width = 10, fluidRow(
@@ -53,23 +51,16 @@ sidebarLayout(
     sidebarPanel(width = 2,
     selectInput("cols2","Select parameters",choices = NULL),
     sliderInput("month","Choose month",max = 12,min = 1,value = 6))
-))
->>>>>>> featured
-    ))
-    
+))))
+   
 
 server = function(input,output,session){
-
     df2 = reactive({read_excel(input$data$datapath)})
     df_year = reactive({pere_year(df2())})
     df_month = reactive({monthly(df2())})
     month_summary = reactive({summary(df_month()[[input$cols]])})
-<<<<<<< HEAD
-observeEvent(input$btn,{updateSelectInput(inputId = "cols",choices = colnames(df2())[2:12])})
-=======
 observeEvent(input$btn,{updateSelectInput(inputId = "cols",choices = colnames(df2())[2:12])
 updateSelectInput(inputId = "cols2",choices = colnames(df2())[2:12])})
->>>>>>> featured
 output$slider1 = renderUI({
     req(input$cols)
     sliderInput("s1","Filter monthly values",max = max(df_month()[[input$cols]]),min = min(df_month()[[input$cols]]),value = max(df_month()[[input$cols]]))
