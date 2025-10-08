@@ -44,8 +44,8 @@ sidebarPanel(width = 3,
 tabPanel("Forecasting",
 sidebarLayout(
     mainPanel(width = 10, fluidRow(
-     column(4,plotOutput("plot3"),verbatimTextOutput("predicted"),textOutput("Monthly Model evaluation"),tableOutput("Evaluation")),
-     column(4,plotOutput("plot4"),verbatimTextOutput("predicted2"),textOutput("Annual Model evaluation"),tableOutput("Evaluation2")))),
+     column(6,plotOutput("plot3"),verbatimTextOutput("predicted"),textOutput("Monthly_eval"),tableOutput("Evaluation")),
+     column(6,plotOutput("plot4"),verbatimTextOutput("predicted2"),textOutput("Annual_eval"),tableOutput("Evaluation2")))),
     sidebarPanel(width = 2,
     selectInput("cols2","Select parameters",choices = NULL),
     sliderInput("month","Choose month",max = 12,min = 1,value = 6))
@@ -79,6 +79,29 @@ df_year2 = reactive({
     df_year()%>%
     filter(.data[[input$cols]]<= input$s2)
 })
+df_month3 = reactive({
+    df2()%>%
+    filter(month(.data[["date"]]) == input$month)
+})
+df_month4 = reactive({
+    pere_year(df_month3())
+})
+month1 = reactive({
+ts1 = ts(df_month4()[[input$cols2]],frequency = 1)
+})
+month2 = reactive({
+fit = auto.arima(month1())
+})
+month_predicted = reactive({
+    forecasted1 = forecast(month2(),h = 1)
+})
+output$plot3 = renderPlot({
+    autoplot(month_predicted())+autolayer(fitted(month_predicted()))+theme_light()+ggtitle("Observed vs Fitted by Arima")+
+    labs(x = "sequence",y = input$cols)
+})
+output$predicted = renderPrint({cat("Predicted ",input$cols," for next year :",month_predicted()$mean)})
+output$Monthly_eval = renderText({paste("Model evaluation:")})
+output$Evaluation = renderTable({accuracy(month_predicted())})
 output$plot1 = renderPlot({
     req(input$data)
     req(input$cols)
