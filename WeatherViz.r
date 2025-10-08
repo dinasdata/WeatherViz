@@ -43,10 +43,10 @@ sidebarPanel(width = 3,
     ))),
 tabPanel("Forecasting",
 sidebarLayout(
-    mainPanel(width = 9, fluidRow(
+    mainPanel(width = 10, fluidRow(
      column(4,plotOutput("plot3"),verbatimTextOutput("predicted"),textOutput("Monthly Model evaluation"),tableOutput("Evaluation")),
      column(4,plotOutput("plot4"),verbatimTextOutput("predicted2"),textOutput("Annual Model evaluation"),tableOutput("Evaluation2")))),
-    sidebarPanel(width = 3,
+    sidebarPanel(width = 2,
     selectInput("cols2","Select parameters",choices = NULL),
     sliderInput("month","Choose month",max = 12,min = 1,value = 6))
 ))
