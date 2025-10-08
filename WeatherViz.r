@@ -5,6 +5,8 @@ library("readxl")
 library("ggplot2")
 library("lubridate")
 library("shiny")
+library("tseries")
+library("forecast")
 #data prepraration
 monthly = function(data){data%>%
 mutate(month = month(.data[["date"]]),year = year(.data[["date"]]))%>%
@@ -19,7 +21,6 @@ group_by(year)%>%
 summarize(RR = sum(.data[["RR"]]),MSLP = mean(.data[["MSLP"]]),FF10 = mean(as.integer(.data[["FF10"]])),
 FF200 = mean(as.integer(.data[["FF200"]])),FF700 = mean(as.integer(.data[["FF700"]])),FF850 = mean(as.integer(.data[["FF850"]])),RH500 = mean(as.integer(.data[["RH500"]])),RH700 = mean(as.integer(.data[["RH700"]])),Tmin = mean(.data[["Tmin"]]),Tmax = mean(.data[["Tmax"]]),Tmoy = mean(.data[["Tmoy"]]))
 }
-
 
 #App preparation
 ui = fluidPage(title = "WeatherViz",
@@ -37,10 +38,18 @@ sidebarPanel(width = 3,
     selectInput("cols","Select parameters",choices = NULL),
     actionButton("btn","Refresh columns",class = "btn-success"),
     selectInput("colors","Choose colors",choices = c("#2997ab","#2cdf85","black","#db5e73ff","grey")),
-    sliderInput("s1","Filter monthly values",max = 0,min = 0,value = 0),
-    sliderInput("s2","Filter per year values",max = 0,min = 0,value = 0),
-    actionButton("btn2","Refresh sliders",class = "btn-success")
-    )))
+    uiOutput("slider1"),
+    uiOutput("slider2") 
+    ))),
+tabPanel("Forecasting",
+sidebarLayout(
+    mainPanel(width = 9, fluidRow(
+     column(4,plotOutput("plot3"),verbatimTextOutput("predicted"),textOutput("Monthly Model evaluation"),tableOutput("Evaluation")),
+     column(4,plotOutput("plot4"),verbatimTextOutput("predicted2"),textOutput("Annual Model evaluation"),tableOutput("Evaluation2")))),
+    sidebarPanel(width = 3,
+    selectInput("cols2","Select parameters",choices = NULL),
+    sliderInput("month","Choose month",max = 12,min = 1,value = 6))
+))
     ))
     
 
@@ -50,10 +59,16 @@ server = function(input,output,session){
     df_year = reactive({pere_year(df2())})
     df_month = reactive({monthly(df2())})
     month_summary = reactive({summary(df_month()[[input$cols]])})
-observeEvent(input$btn,{updateSelectInput(inputId = "cols",choices = colnames(df2())[2:12])})
-observeEvent(input$btn2,{
-updateSliderInput(inputId = "s1",max = as.double(max(df_month()[[input$cols]])),min = as.double(min(df_month()[[input$cols]])),value = as.double(max(df_month()[[input$cols]])))
-updateSliderInput(inputId = "s2",max = as.double(max(df_year()[[input$cols]])),min = as.double(min(df_year()[[input$cols]])),value = as.double(max(df_year()[[input$cols]])))})
+observeEvent(input$btn,{updateSelectInput(inputId = "cols",choices = colnames(df2())[2:12])
+updateSelectInput(inputId = "cols2",choices = colnames(df2())[2:12])})
+output$slider1 = renderUI({
+    req(input$cols)
+    sliderInput("s1","Filter monthly values",max = max(df_month()[[input$cols]]),min = min(df_month()[[input$cols]]),value = max(df_month()[[input$cols]]))
+})
+output$slider2 = renderUI({
+    req(input$cols)
+    sliderInput("s2","Filter monthly values",max = max(df_year()[[input$cols]]),min = min(df_year()[[input$cols]]),value = max(df_year()[[input$cols]]))
+})
 df_month2 = reactive({
     req(input$s1)
     df_month()%>%
