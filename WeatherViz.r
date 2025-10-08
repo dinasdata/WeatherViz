@@ -7,6 +7,7 @@ library("lubridate")
 library("shiny")
 library("tseries")
 library("forecast")
+
 #data prepraration
 monthly = function(data){data%>%
 mutate(month = month(.data[["date"]]),year = year(.data[["date"]]))%>%
@@ -23,7 +24,7 @@ FF200 = mean(as.integer(.data[["FF200"]])),FF700 = mean(as.integer(.data[["FF700
 }
 
 #App preparation
-ui = fluidPage(title = "WeatherViz",
+ui = fluidPage(title = "WeatherViz",theme = bslib::bs_theme(bootswatch = "darkly"),
 navbarPage(title = "WeatherViz",
 tabPanel("Visualization",
 sidebarLayout(
@@ -96,12 +97,28 @@ month_predicted = reactive({
     forecasted1 = forecast(month2(),h = 1)
 })
 output$plot3 = renderPlot({
-    autoplot(month_predicted())+autolayer(fitted(month_predicted()))+theme_light()+ggtitle("Observed vs Fitted by Arima")+
-    labs(x = "sequence",y = input$cols)
+    autoplot(month_predicted())+autolayer(fitted(month_predicted()))+theme_light()+ggtitle("Observed vs Fitted per month")+
+    labs(x = "sequence",y = input$cols2)
 })
-output$predicted = renderPrint({cat("Predicted ",input$cols," for next year :",month_predicted()$mean)})
+year1 = reactive({
+    ts1 = ts(df_year2()[[input$cols2]],frequency = 1)
+})
+year2 = reactive({
+    ts2 = auto.arima(year1())
+})
+year_predicted = reactive({
+    predicted = forecast(year2(),h = 1)
+})
+output$plot4 = renderPlot({
+    autoplot(year_predicted())+autolayer(fitted(year_predicted()))+theme_light()+ggtitle("Observe vs Fitted per year")+
+    labs(x = "sequence",y = input$cols2)
+})
+output$predicted = renderPrint({cat("Predicted ",input$cols," for next year","on the month n° ",input$month,":",month_predicted()$mean)})
 output$Monthly_eval = renderText({paste("Model evaluation:")})
 output$Evaluation = renderTable({accuracy(month_predicted())})
+output$predicted2 = renderPrint({cat("Predicted ",input$cols," for next year :",year_predicted()$mean)})
+output$Annual_eval = renderText({paste("Model evaluation:")})
+output$Evaluation2 = renderTable({accuracy(year_predicted())})
 output$plot1 = renderPlot({
     req(input$data)
     req(input$cols)
