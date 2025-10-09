@@ -67,7 +67,7 @@ output$slider1 = renderUI({
 })
 output$slider2 = renderUI({
     req(input$cols)
-    sliderInput("s2","Filter monthly values",max = max(df_year()[[input$cols]]),min = min(df_year()[[input$cols]]),value = max(df_year()[[input$cols]]))
+    sliderInput("s2","Filter per year values",max = max(df_year()[[input$cols]]),min = min(df_year()[[input$cols]]),value = max(df_year()[[input$cols]]))
 })
 df_month2 = reactive({
     req(input$s1)
